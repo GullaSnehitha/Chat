@@ -1,0 +1,15 @@
+C:\Users\SnehithaG\Desktop\chatapp\ChatApplication\bin\Debug\net7.0-windows\ChatApplication.exe
+C:\Users\SnehithaG\Desktop\chatapp\ChatApplication\bin\Debug\net7.0-windows\ChatApplication.deps.json
+C:\Users\SnehithaG\Desktop\chatapp\ChatApplication\bin\Debug\net7.0-windows\ChatApplication.runtimeconfig.json
+C:\Users\SnehithaG\Desktop\chatapp\ChatApplication\bin\Debug\net7.0-windows\ChatApplication.dll
+C:\Users\SnehithaG\Desktop\chatapp\ChatApplication\bin\Debug\net7.0-windows\ChatApplication.pdb
+C:\Users\SnehithaG\Desktop\chatapp\ChatApplication\obj\Debug\net7.0-windows\ChatApplication.csproj.AssemblyReference.cache
+C:\Users\SnehithaG\Desktop\chatapp\ChatApplication\obj\Debug\net7.0-windows\ChatApplication.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\SnehithaG\Desktop\chatapp\ChatApplication\obj\Debug\net7.0-windows\ChatApplication.AssemblyInfoInputs.cache
+C:\Users\SnehithaG\Desktop\chatapp\ChatApplication\obj\Debug\net7.0-windows\ChatApplication.AssemblyInfo.cs
+C:\Users\SnehithaG\Desktop\chatapp\ChatApplication\obj\Debug\net7.0-windows\ChatApplication.csproj.CoreCompileInputs.cache
+C:\Users\SnehithaG\Desktop\chatapp\ChatApplication\obj\Debug\net7.0-windows\ChatApplication.dll
+C:\Users\SnehithaG\Desktop\chatapp\ChatApplication\obj\Debug\net7.0-windows\refint\ChatApplication.dll
+C:\Users\SnehithaG\Desktop\chatapp\ChatApplication\obj\Debug\net7.0-windows\ChatApplication.pdb
+C:\Users\SnehithaG\Desktop\chatapp\ChatApplication\obj\Debug\net7.0-windows\ChatApplication.genruntimeconfig.cache
+C:\Users\SnehithaG\Desktop\chatapp\ChatApplication\obj\Debug\net7.0-windows\ref\ChatApplication.dll
