@@ -1,77 +1,129 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Windows.Forms;
 
 namespace ChatApplication
 {
     public partial class Form1 : Form
     {
-        private List<string> conversation = new List<string>();
         private Form2 form2;
+        private List<string> conversationHistory = new List<string>();
+        private string filePath = "conversation.txt"; // File path for saving and loading the conversation
+        private int indentation = 100; // Adjust the indentation for sent messages as needed
 
         public Form1()
         {
             InitializeComponent();
+            form2 = new Form2(this);
+            form2.Show();
+            LoadConversation();
         }
 
-        public void AttachForm2(Form2 form2Ref)
+        public void ReceiveMessage(string message)
         {
-            form2 = form2Ref;
-            form2.MessageSent += Form2_MessageSent; // Subscribe to the MessageSent event of Form2
+            conversationHistory.Add(message);
+            textBoxMessages.Rtf = FormatConversation();
         }
 
-        private void btnSend_Click(object sender, EventArgs e)
+        public void ClearConversation()
         {
-            string message = txtMessage.Text.Trim();
+            conversationHistory.Clear();
+            textBoxMessages.Clear();
+        }
+
+        private void SendButton_Click(object sender, EventArgs e)
+        {
+            string message = textBoxMessage.Text.Trim();
             if (!string.IsNullOrEmpty(message))
             {
-                conversation.Add("Form1: " + message);
-                DisplayConversation();
-                txtMessage.Text = "";
-
-                // Raise the MessageSent event to notify Form2 about the message
-                OnMessageSent(message);
+                ReceiveMessage($"Me1: {message}");
+                form2.ReceiveMessage($"Friend: {message}");
+                textBoxMessage.Clear();
             }
         }
 
-        // Custom event declaration
-        public event EventHandler<string>? MessageSent;
-
-        // Helper method to raise the MessageSent event
-        protected virtual void OnMessageSent(string message)
+        private void CancelButton_Click(object sender, EventArgs e)
         {
-            MessageSent?.Invoke(this, message);
+            textBoxMessage.Clear();
         }
 
-        private void DisplayConversation()
+        private void ClearButton_Click(object sender, EventArgs e)
         {
-            listBoxConversation.Items.Clear();
-            foreach (string message in conversation)
+            ClearConversation();
+            SaveConversation(); // Save the conversation when the "Clear" button is clicked
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            SaveConversation();
+        }
+
+        private void SaveConversation()
+        {
+            try
             {
-                listBoxConversation.Items.Add(message);
+                using (StreamWriter writer = new StreamWriter(filePath))
+                {
+                    foreach (string message in conversationHistory)
+                    {
+                        writer.WriteLine(message);
+                    }
+                }
             }
-        }
-
-        private void btnCancel_Click(object sender, EventArgs e)
-        {
-            txtMessage.Text = "";
-        }
-
-        private void btnClear_Click(object sender, EventArgs e)
-        {
-            conversation.Clear();
-            DisplayConversation();
-        }
-
-        // Event handler for the MessageSent event of Form2 (Received message from Form2)
-        private void Form2_MessageSent(object sender, string message)
-        {
-            // Check if the event sender is of type Form2
-            if (sender is Form2)
+            catch (Exception ex)
             {
-                conversation.Add("Form2: " + message);
-                DisplayConversation();
+                MessageBox.Show("Error while saving the conversation: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void LoadConversation()
+        {
+            try
+            {
+                if (File.Exists(filePath))
+                {
+                    conversationHistory.Clear();
+                    using (StreamReader reader = new StreamReader(filePath))
+                    {
+                        string line;
+                        while ((line = reader.ReadLine()) != null)
+                        {
+                            conversationHistory.Add(line);
+                        }
+                    }
+                    textBoxMessages.Rtf = FormatConversation();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error while loading the conversation: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        // Helper method to format the conversation for displaying in RichTextBox.
+        private string FormatConversation()
+        {
+            string conversation = "{\\rtf1\\ansi";
+            foreach (string message in conversationHistory)
+            {
+                string formattedMessage;
+                if (message.StartsWith("Me1"))
+                {
+                    string sentMessage = message.Substring(4);
+                    formattedMessage = $"\\b {sentMessage}\\b0";
+                    formattedMessage = formattedMessage.Insert(0, $"\\b You\\cf2\\f1\\qr\\li{indentation} ");
+                }
+                else
+                {
+                    formattedMessage = $"{message}\\b0";
+                    formattedMessage = formattedMessage.Insert(0, "\\cf1\\f0\\ql ");
+                }
+
+                conversation += "\\par " + formattedMessage;
+            }
+            conversation += "}";
+            return conversation;
         }
     }
 }

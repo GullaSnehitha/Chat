@@ -1,77 +1,124 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Windows.Forms;
 
 namespace ChatApplication
 {
     public partial class Form2 : Form
     {
-        private List<string> conversation = new List<string>();
-        private Form1 form1;
+        private Form1 otherForm;
+        private List<string> conversationHistory = new List<string>();
+        private string filePath = "conversation2.txt"; // File path for saving and loading the conversation
 
-        public Form2()
+        public Form2(Form1 form1)
         {
             InitializeComponent();
+            otherForm = form1;
+            LoadConversation();
         }
 
-        public void AttachForm1(Form1 form1Ref)
+        public void ReceiveMessage(string message)
         {
-            form1 = form1Ref; // Initialize the reference to Form1
-            form1.MessageSent += Form1_MessageSent; // Subscribe to the MessageSent event of Form1
+            conversationHistory.Add(message);
+            textBoxMessages.Rtf = FormatConversation();
+            SaveConversation(); // Save the conversation after receiving a new message
         }
 
-        private void btnSend_Click(object sender, EventArgs e)
+        public void ClearConversation()
         {
-            string message = txtMessage.Text.Trim();
+            conversationHistory.Clear();
+            textBoxMessages.Clear();
+        }
+
+        private void SendButton_Click(object sender, EventArgs e)
+        {
+            string message = textBoxMessage.Text.Trim();
             if (!string.IsNullOrEmpty(message))
             {
-                conversation.Add("Form2: " + message);
-                DisplayConversation();
-                txtMessage.Text = "";
-
-                // Raise the MessageSent event to notify Form1 about the message
-                OnMessageSent(message);
+                ReceiveMessage($"You: {message}");
+                otherForm.ReceiveMessage($"Friend: {message}");
+                SaveConversation(); // Save the conversation when a new message is sent
+                textBoxMessage.Clear();
             }
         }
 
-        // Custom event declaration
-        public event EventHandler<string>? MessageSent;
-
-        // Helper method to raise the MessageSent event
-        protected virtual void OnMessageSent(string message)
+        private void CancelButton_Click(object sender, EventArgs e)
         {
-            MessageSent?.Invoke(this, message);
+            textBoxMessage.Clear();
         }
 
-        private void DisplayConversation()
+        private void ClearButton_Click(object sender, EventArgs e)
         {
-            listBoxConversation.Items.Clear();
-            foreach (string message in conversation)
+            ClearConversation();
+            SaveConversation(); // Save the conversation when the "Clear" button is clicked
+        }
+
+        private void SaveConversation()
+        {
+            try
             {
-                listBoxConversation.Items.Add(message);
+                using (StreamWriter writer = new StreamWriter(filePath))
+                {
+                    foreach (string message in conversationHistory)
+                    {
+                        writer.WriteLine(message);
+                    }
+                }
             }
-        }
-
-        private void btnCancel_Click(object sender, EventArgs e)
-        {
-            txtMessage.Text = "";
-        }
-
-        private void btnClear_Click(object sender, EventArgs e)
-        {
-            conversation.Clear();
-            DisplayConversation();
-        }
-
-        // Event handler for the MessageSent event of Form1 (Received message from Form1)
-        private void Form1_MessageSent(object sender, string message)
-        {
-            // Check if the event sender is of type Form1
-            if (sender is Form1)
+            catch (Exception ex)
             {
-                conversation.Add("Form1: " + message);
-                DisplayConversation();
+                MessageBox.Show("Error while saving the conversation: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+        private void LoadConversation()
+        {
+            try
+            {
+                if (File.Exists(filePath))
+                {
+                    conversationHistory.Clear();
+                    using (StreamReader reader = new StreamReader(filePath))
+                    {
+                        string line;
+                        while ((line = reader.ReadLine()) != null)
+                        {
+                            conversationHistory.Add(line);
+                        }
+                    }
+                    textBoxMessages.Rtf = FormatConversation();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error while loading the conversation: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+          private string FormatConversation()
+        {
+            string conversation = "{\\rtf1\\ansi";
+            foreach (string message in conversationHistory)
+            {
+                string formattedMessage;
+                if (message.StartsWith("You"))
+                {
+                    string sentMessage = message.Substring(4);
+                    int indentation = 45; // Adjust the indentation as needed to move messages to the right
+                    formattedMessage = "\\b " + sentMessage + "\\b0";
+                    formattedMessage = formattedMessage.Insert(0, $"\\b You:\\cf2\\f1\\qr\\li{indentation} ");
+                }
+                else
+                {
+                    formattedMessage = "" + message + "\\b0";
+                    formattedMessage = formattedMessage.Insert(0, "\\cf1\\f0\\ql ");
+                }
+
+                conversation += "\\par " + formattedMessage;
+            }
+            conversation += "}";
+            return conversation;
+        }
+   
     }
 }
